@@ -3,6 +3,7 @@ import('node-fetch').then((nodeFetch) => {
     const cheerio = require('cheerio');
     const express = require('express');
     const cors = require('cors');
+    const axios = require('axios');
 
     const app = express();
     const PORT = 3000;
@@ -14,13 +15,15 @@ import('node-fetch').then((nodeFetch) => {
         console.log('Received URL:', spotifyUrl);
         
         try {
-            const response = await fetch(spotifyUrl);
+            let response = await fetch(spotifyUrl);
             const html = await response.text();
             const $ = cheerio.load(html);
             const linkElement = $('link[rel="alternate"][type="application/json+oembed"]');
             const hrefValue = linkElement.attr('href');
-            
-            res.send({ href: hrefValue });
+            console.log(hrefValue);
+            response = await axios.get(hrefValue);
+            console.log(response.data);
+            res.send({ html: response.data.html });
         } catch (error) {
             console.error('Error:', error);
             res.status(500).send('Internal Server Error');
